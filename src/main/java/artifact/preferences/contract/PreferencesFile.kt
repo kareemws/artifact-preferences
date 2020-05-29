@@ -12,13 +12,16 @@ abstract class PreferencesFile {
 
     private lateinit var sharedPreferenceInstance: SharedPreferences
 
-    private val properties: ArrayList<Property<*>> = ArrayList()
+    private val properties: MutableList<Property<*>> = mutableListOf()
 
-    open fun init(context: Context) {
+    fun init(context: Context, clearOnInit: Boolean = false) {
         sharedPreferenceInstance = context.getSharedPreferences(fileName, mode)
+        if (clearOnInit)
+            clearFile()
         properties.forEach {
             it.init()
         }
+        properties.clear()
     }
 
     fun <T> retrieveValue(propertyName: String, type: Type): T? {
@@ -44,9 +47,10 @@ abstract class PreferencesFile {
     }
 
     fun attachProperty(property: Property<*>) {
-        properties.add(property)
         if (this::sharedPreferenceInstance.isInitialized)
             property.init()
+        else
+            properties.add(property)
     }
 
     fun clearFile() {

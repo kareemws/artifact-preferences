@@ -7,12 +7,13 @@ object InitializationDaemon {
 
     private lateinit var context: Context
 
-    private val preferenceFiles: MutableList<PreferencesFile> = mutableListOf()
+    private val preferenceFiles: MutableList<Pair<PreferencesFile, Boolean>> = mutableListOf()
 
     private fun initializePreferenceFiles() {
         preferenceFiles.forEach {
-            it.init(context)
+            it.first.init(context, it.second)
         }
+        preferenceFiles.clear()
     }
 
     fun init(context: Context) {
@@ -22,9 +23,10 @@ object InitializationDaemon {
         initializePreferenceFiles()
     }
 
-    fun attachPreferenceFile(file: PreferencesFile) {
-        preferenceFiles.add(file)
+    fun attachPreferenceFile(file: PreferencesFile, clearOnInit: Boolean = false) {
         if (this::context.isInitialized)
-            file.init(context)
+            file.init(context, clearOnInit)
+        else
+            preferenceFiles.add(Pair(file, clearOnInit))
     }
 }
